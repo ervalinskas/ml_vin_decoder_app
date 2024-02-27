@@ -19,13 +19,13 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Create Squashed Commit for Master
+      - name: Create Squashed Commit for main
         run: |
-          git fetch origin master
-          git checkout -b release-to-master
-          git reset --soft origin/master
-          git commit -m "feat: release to master"
-          git push origin release-to-master
+          git fetch origin main
+          git checkout -b release-to-main
+          git reset --soft origin/main
+          git commit -m "feat: release to main"
+          git push origin release-to-main
 
       - name: Create Pull Request
         uses: actions/github-script@v5
@@ -34,8 +34,8 @@ jobs:
           script: |
             const title = "Release to Production";
             const body = "This is an automated PR to release changes to production";
-            const head = "release-to-master";
-            const base = "master";
+            const head = "release-to-main";
+            const base = "main";
             const draft = false;
 
             const pullRequest = await github.rest.pulls.create({
