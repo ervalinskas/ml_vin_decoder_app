@@ -1,0 +1,55 @@
+name: Create Release PR
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  create-release-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+        with:
+          ref: 'develop'
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Create Squashed Commit for Master
+        run: |
+          git fetch origin master
+          git checkout -b release-to-master
+          git reset --soft origin/master
+          git commit -m "feat: release to master"
+          git push origin release-to-master
+
+      - name: Create Pull Request
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const title = "Release to Production";
+            const body = "This is an automated PR to release changes to production";
+            const head = "release-to-master";
+            const base = "master";
+            const draft = false;
+
+            const pullRequest = await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              body,
+              head,
+              base,
+              draft,
+            });
+
+            if (pullRequest.status !== 201) {
+              throw new Error("Failed to create pull request");
+            }
+            console.log(`Pull request created: ${pullRequest.data.html_url}`);
+
