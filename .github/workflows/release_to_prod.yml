@@ -1,0 +1,51 @@
+name: Create Release PR
+
+permissions:
+  contents: write
+  pull-requests: write
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  create-release-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+        with:
+          ref: 'develop'
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Create Squashed Commit for main
+        run: |
+          git fetch origin main
+          git checkout -b release-to-main
+          git reset --soft origin/main
+          git commit -m "feat: release to main"
+          git push origin release-to-main
+
+      - name: Create Pull Request
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const title = "Release to Production";
+            const body = "This is an automated PR to release changes to production";
+            const head = "release-to-main"; 
+            const base = "main";
+            github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: body,
+              head: head,
+              base: base,
+            });
+
