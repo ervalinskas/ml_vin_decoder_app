@@ -1,0 +1,12 @@
+[data]
+data_url="https://raw.githubusercontent.com/ervalinskas/public_datasets/main/vin_decoder/raw_data.csv"
+raw_data_dir="/data/raw"
+validated_data_dir="/data/data_validation"
+preprocessed_labels_dir="/data/preprocessed_labels"
+
+[logs]
+logs_dir="/logs"
+
+[mlflow]
+model_registry="stores/model"
+blob_store="stores/blob"
