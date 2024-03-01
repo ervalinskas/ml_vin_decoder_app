@@ -1,5 +1,5 @@
 from __future__ import annotations
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 import tomllib
 from pathlib import Path
 
@@ -10,6 +10,10 @@ class DataConfig(BaseModel):
     validated_data_dir: str
     preprocessed_labels_dir: str
 
+    @property
+    def raw_file_path(self):
+        return Path(self.raw_data_dir) / "raw.csv"
+
 
 class LogsConfig(BaseModel):
     logs_dir: str
@@ -18,6 +22,8 @@ class LogsConfig(BaseModel):
 class MLflowConfig(BaseModel):
     model_registry: str
     blob_store: str
+
+    model_config = ConfigDict(protected_namespaces=())
 
 
 class AppConfig(BaseModel):
