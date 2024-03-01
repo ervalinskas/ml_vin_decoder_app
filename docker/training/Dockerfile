@@ -24,4 +24,3 @@ COPY config.toml config.toml
 
 ENV PATH="/${PROJECT_NAME}/.venv/bin:${PATH}"
 ENV CONFIG_FILE_PATH="/${PROJECT_NAME}/config.toml"
-
