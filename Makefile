@@ -16,3 +16,9 @@ venv:
 	@echo "$(ccso)--> Creating virtual environment $(ccend)"
 	pyenv local ${PYTHON_VERSION}
 	poetry install
+
+.ONESHELL:
+style:
+	poetry run black .
+	poetry run flake8
+	poetry run isort .
