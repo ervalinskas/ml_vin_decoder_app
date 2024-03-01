@@ -2,7 +2,6 @@ from __future__ import annotations
 import pandas as pd
 from pathlib import Path
 from vin_decoder.config import DataConfig
-import os
 
 
 class Extraction:
