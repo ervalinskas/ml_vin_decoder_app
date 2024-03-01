@@ -281,3 +281,4 @@ fabric.properties
 # MLflow artifacts
 logs
 stores
+data/**/*.csv
