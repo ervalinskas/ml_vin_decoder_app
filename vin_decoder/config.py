@@ -1,7 +1,9 @@
 from __future__ import annotations
-from pydantic import BaseModel, ConfigDict
+
 import tomllib
 from pathlib import Path
+
+from pydantic import BaseModel, ConfigDict
 
 
 class DataConfig(BaseModel):

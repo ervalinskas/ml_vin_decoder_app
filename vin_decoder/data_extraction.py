@@ -1,6 +1,9 @@
 from __future__ import annotations
-import pandas as pd
+
 from pathlib import Path
+
+import pandas as pd
+
 from vin_decoder.config import DataConfig
 
 

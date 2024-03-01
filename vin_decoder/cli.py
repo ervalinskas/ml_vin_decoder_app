@@ -1,4 +1,5 @@
 import click
+
 from vin_decoder.config import AppConfig
 from vin_decoder.data_extraction import Extraction
 
