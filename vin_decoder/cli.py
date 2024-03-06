@@ -1,6 +1,8 @@
+import sys
+
 import click
 from loguru import logger
-import sys
+
 from vin_decoder.config import AppConfig
 from vin_decoder.data_extraction import Extraction
 from vin_decoder.data_validation import Validation

@@ -1,8 +1,9 @@
 from __future__ import annotations
-from typing import Callable
-import loguru
-from pathlib import Path
 
+from pathlib import Path
+from typing import Callable
+
+import loguru
 import pandas as pd
 
 from vin_decoder.config import DataConfig
@@ -75,10 +76,10 @@ class Validation:
                 header=True,
             )
 
-            bad_vin_label_pairs = df[
-                df[gr_col].isin(conflicts_df[gr_col])
-            ].sort_values(by=["vin", "make", "model", "year", "body"])
-            
+            bad_vin_label_pairs = df[df[gr_col].isin(conflicts_df[gr_col])].sort_values(
+                by=["vin", "make", "model", "year", "body"]
+            )
+
             bad_vin_label_pairs.to_csv(
                 Path(self.validated_data_dir) / f"{gr_col}_{col}_pairs_bad.csv",
                 index=False,

@@ -1,7 +1,8 @@
 from __future__ import annotations
-import loguru
+
 from pathlib import Path
 
+import loguru
 import pandas as pd
 
 from vin_decoder.config import DataConfig
@@ -9,14 +10,18 @@ from vin_decoder.config import DataConfig
 
 class Extraction:
 
-    def __init__(self, data_url: str, raw_file_path: Path, logger: loguru.Logger) -> None:
+    def __init__(
+        self, data_url: str, raw_file_path: Path, logger: loguru.Logger
+    ) -> None:
         self.data_url = data_url
         self.raw_file_path = raw_file_path
         self.logger = logger
 
     @classmethod
     def from_config(cls, config: DataConfig, logger: loguru.Logger) -> Extraction:
-        return cls(data_url=config.data_url, raw_file_path=config.raw_file_path, logger=logger)
+        return cls(
+            data_url=config.data_url, raw_file_path=config.raw_file_path, logger=logger
+        )
 
     def extract_data(self):
         vins_df = pd.read_csv(self.data_url)
