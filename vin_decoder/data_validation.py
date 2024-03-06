@@ -27,7 +27,7 @@ class Validation:
     def from_config(cls, config: DataConfig, logger: loguru.Logger) -> Validation:
         return cls(
             raw_file_path=config.raw_file_path,
-            validated_data_dir=config.validated_data_dir,
+            validated_data_dir=Path(config.validated_data_dir),
             labels_to_validate=config.preprocessing.labels_to_validate,
             logger=logger,
         )

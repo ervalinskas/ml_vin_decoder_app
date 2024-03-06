@@ -5,6 +5,7 @@ from loguru import logger
 
 from vin_decoder.config import AppConfig
 from vin_decoder.data_extraction import Extraction
+from vin_decoder.data_preprocessing import Preprocessing
 from vin_decoder.data_validation import Validation
 
 logger.add(sys.stdout, format="{time} {level} {message}", level="INFO")
@@ -37,3 +38,13 @@ def validate_data(ctx):
         logger=ctx.obj["logger"],
     )
     validate.validate_data()
+
+
+@vin_decoder.command()
+@click.pass_context
+def preprocess_data(ctx):
+    preprocess = Preprocessing.from_config(
+        config=ctx.obj["config"].data,
+        logger=ctx.obj["logger"],
+    )
+    preprocess.preprocess_data()
