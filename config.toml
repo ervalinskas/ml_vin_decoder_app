@@ -4,9 +4,20 @@ raw_data_dir="./data/raw"
 validated_data_dir="./data/data_validation"
 preprocessed_labels_dir="./data/preprocessed_labels"
 
+[data.preprocessing]
+labels_to_validate = ["make", "model", "year", "body"]
+labels_to_preprocess = ["model"]
+
 [logs]
 logs_dir="./logs"
 
 [mlflow]
 model_registry="./stores/model"
 blob_store="./stores/blob"
+
+# [modeling]
+# labels_to_train = ["model"]
+
+# [modeling.hyperparams]
+# vectorizer = { ngram_range=[2, 2], analyzer="char" }
+# param_grid = { learning_rate=[0.15], depth=[10], iterations=[10] }
