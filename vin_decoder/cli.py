@@ -1,7 +1,11 @@
 import click
-
+from loguru import logger
+import sys
 from vin_decoder.config import AppConfig
 from vin_decoder.data_extraction import Extraction
+from vin_decoder.data_validation import Validation
+
+logger.add(sys.stdout, format="{time} {level} {message}", level="INFO")
 
 
 @click.group()
@@ -9,12 +13,25 @@ from vin_decoder.data_extraction import Extraction
 @click.pass_context
 def vin_decoder(ctx, config_file_path):
     ctx.ensure_object(dict)
+    ctx.obj["logger"] = logger
     ctx.obj["config"] = AppConfig.from_toml(path=config_file_path)
 
 
 @vin_decoder.command()
 @click.pass_context
 def extract_data(ctx):
-    config = ctx.obj["config"]
-    extract = Extraction.from_config(config=config.data)
-    extract._extract_data()
+    extract = Extraction.from_config(
+        config=ctx.obj["config"].data,
+        logger=ctx.obj["logger"],
+    )
+    extract.extract_data()
+
+
+@vin_decoder.command()
+@click.pass_context
+def validate_data(ctx):
+    validate = Validation.from_config(
+        config=ctx.obj["config"].data,
+        logger=ctx.obj["logger"],
+    )
+    validate.validate_data()
