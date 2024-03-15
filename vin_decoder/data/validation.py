@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Callable
+from typing import Callable, Literal
 
 import loguru
 import pandas as pd
@@ -15,20 +15,25 @@ class Validation:
         self,
         raw_file_path: Path,
         validated_data_dir: Path,
-        labels_to_validate: list[str],
+        target: Literal["make", "model", "year", "body"],
         logger: loguru.Logger,
     ) -> None:
         self.raw_file_path = raw_file_path
         self.validated_data_dir = validated_data_dir
-        self.labels_to_validate = labels_to_validate
+        self.target = target
         self.logger = logger
 
     @classmethod
-    def from_config(cls, config: DataConfig, logger: loguru.Logger) -> Validation:
+    def from_config(
+        cls,
+        config: DataConfig,
+        target: Literal["make", "model", "year", "body"],
+        logger: loguru.Logger,
+    ) -> Validation:
         return cls(
             raw_file_path=config.raw_file_path,
             validated_data_dir=Path(config.validated_data_dir),
-            labels_to_validate=config.preprocessing.labels_to_validate,
+            target=target,
             logger=logger,
         )
 
@@ -47,7 +52,7 @@ class Validation:
     @staticmethod
     def _get_conflicting_vins(
         df: pd.DataFrame,
-        col: str,
+        col: Literal["make", "model", "year", "body"],
         gr_col: str = "vin",
         func_list: list[Callable | str] = [set, "count"],
     ) -> pd.DataFrame:
@@ -58,7 +63,12 @@ class Validation:
         result = result[result[col + "_count"] > 1].drop(columns=[col + "_count"])
         return result.reset_index()
 
-    def validate_labels(self, df: pd.DataFrame, col: str, gr_col: str = "vin") -> None:
+    def validate_labels(
+        self,
+        df: pd.DataFrame,
+        col: str,
+        gr_col: Literal["make", "model", "year", "body"] = "vin",
+    ) -> None:
         check_df = self._check_for_conflicts(df=df, col=col)
         if not check_df.empty:
             self.logger.info(f"There are conflicts in the '{col}' column!")
@@ -92,7 +102,6 @@ class Validation:
         vins = pd.read_csv(self.raw_file_path)
         vins.drop_duplicates(inplace=True)
 
-        for col in self.labels_to_validate:
-            self.validate_labels(df=vins, col=col)
+        self.validate_labels(df=vins, col=self.target)
 
         self.logger.info("✅ Data validation is finished!")
