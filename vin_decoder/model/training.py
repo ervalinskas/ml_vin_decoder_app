@@ -7,8 +7,10 @@ from sklearn.feature_extraction.text import CountVectorizer
 import loguru
 import optuna
 import pandas as pd
+import numpy as np
 import xgboost as xgb
 
+from vin_decoder.data.feature_engineering import extract_features_labels
 from vin_decoder.config import DataConfig, ParamGridConfig
 
 
@@ -31,6 +33,28 @@ class Classifier:
         pass
 
 
+class Objective(object):
+    def __init__(self, iris):
+        self.iris = iris
+
+    def __call__(self, trial):
+        x, y = self.iris.data, self.iris.target
+
+        classifier_name = trial.suggest_categorical("classifier", ["SVC", "RandomForest"])
+        if classifier_name == "SVC":
+            svc_c = trial.suggest_float("svc_c", 1e-10, 1e10, log=True)
+            classifier_obj = sklearn.svm.SVC(C=svc_c, gamma="auto")
+        else:
+            rf_max_depth = trial.suggest_int("rf_max_depth", 2, 32, log=True)
+            classifier_obj = sklearn.ensemble.RandomForestClassifier(
+                max_depth=rf_max_depth, n_estimators=10
+            )
+
+        score = sklearn.model_selection.cross_val_score(classifier_obj, x, y, n_jobs=-1, cv=3)
+        accuracy = score.mean()
+        return accuracy
+
+
 class Tuning:
 
     def __init__(
@@ -47,7 +71,7 @@ class Tuning:
         param = {
             "objective": "binary:logistic",  # Example for binary classification
             "eval_metric": "auc",
-            "learning_rate": trial.suggest_float("learning_rate", 0.01, 0.2),
+            "learning_rate": trial.suggest_float("learning_rate", param_grid.),
             "n_estimators": trial.suggest_int("n_estimators", 100, 1000),
             "max_depth": trial.suggest_int("max_depth", 3, 9),
             "subsample": trial.suggest_float("subsample", 0.8, 1.0),
@@ -86,6 +110,9 @@ class Tuning:
 
         # Return the metric to be maximized/minimized and average stopping round
         return cv_results["test-auc-mean"].max(), avg_stopping_round
+    
+    def tune_params(self):
+        pass
 
 
 class Training:

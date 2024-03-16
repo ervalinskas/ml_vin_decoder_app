@@ -37,9 +37,8 @@ class Validation:
             logger=logger,
         )
 
-    @staticmethod
     def _check_for_conflicts(
-        df: pd.DataFrame, col: str, gr_col: str = "vin"
+        self, df: pd.DataFrame, col: str, gr_col: str = "vin"
     ) -> pd.DataFrame:
         vin_col_df = df[[gr_col, col]].drop_duplicates()
         non_null_vin_col_df = vin_col_df[vin_col_df[col].notnull()]
@@ -49,8 +48,8 @@ class Validation:
         )
         return non_null_vin_col_conflicts
 
-    @staticmethod
     def _get_conflicting_vins(
+        self,
         df: pd.DataFrame,
         col: Literal["make", "model", "year", "body"],
         gr_col: str = "vin",
@@ -63,7 +62,7 @@ class Validation:
         result = result[result[col + "_count"] > 1].drop(columns=[col + "_count"])
         return result.reset_index()
 
-    def validate_labels(
+    def _validate_labels(
         self,
         df: pd.DataFrame,
         col: str,

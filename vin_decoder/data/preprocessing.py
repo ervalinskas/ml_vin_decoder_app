@@ -64,15 +64,14 @@ class Preprocessing:
             logger=logger,
         )
 
-    @staticmethod
-    def map_labels(
-        df: pd.DataFrame, label: Literal["make", "model", "year", "body"], d: dict
+    def _map_labels(
+        self, df: pd.DataFrame, label: Literal["make", "model", "year", "body"], d: dict
     ) -> pd.DataFrame:
         df[label] = df[label].map(d).fillna(df[label])
         return df
 
-    @staticmethod
-    def impute_missing_values(
+    def _impute_missing_values(
+        self,
         df: pd.DataFrame,
         label: Literal["make", "model", "year", "body"],
     ) -> pd.DataFrame:
@@ -89,9 +88,11 @@ class Preprocessing:
             Path(self.validated_data_dir, f"vin_{self.target}_pairs_good.csv")
         )
         df = df[["vin", self.target]].drop_duplicates()
+
         for d in [self.CUSTOM_MODEL_GROUP_1, self.CUSTOM_MODEL_GROUP_2]:
-            df = self.map_labels(df=df, label=self.target, d=d)
-        df = self.impute_missing_values(df=df, label=self.target)
+            df = self._map_labels(df=df, label=self.target, d=d)
+
+        df = self._impute_missing_values(df=df, label=self.target)
 
         Path(self.preprocessed_labels_dir).mkdir(parents=True, exist_ok=True)
 
