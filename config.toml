@@ -4,10 +4,6 @@ raw_data_dir="./data/raw"
 validated_data_dir="./data/data_validation"
 preprocessed_labels_dir="./data/preprocessed_labels"
 
-[data.preprocessing]
-labels_to_validate = ["make", "model", "year", "body"]
-labels_to_preprocess = ["model"]
-
 [logs]
 logs_dir="./logs"
 
@@ -15,9 +11,10 @@ logs_dir="./logs"
 model_registry="./stores/model"
 blob_store="./stores/blob"
 
-# [modeling]
-# labels_to_train = ["model"]
+[modeling]
+vectorizer = { ngram_range=[2, 2], analyzer="char" }
 
-# [modeling.hyperparams]
-# vectorizer = { ngram_range=[2, 2], analyzer="char" }
-# param_grid = { learning_rate=[0.15], depth=[10], iterations=[10] }
+[modeling.hyperparameters]
+objective = "multi:softprob"
+eval_metric = "accuracy"
+param_grid = { learning_rate=[0.1, 0.13, 0.15], depth=[6, 8, 10] }

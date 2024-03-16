@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Literal
 
 import loguru
 import pandas as pd
@@ -41,30 +42,39 @@ class Preprocessing:
         self,
         validated_data_dir: Path,
         preprocessed_labels_dir: Path,
-        labels_to_preprocess: list[str],
+        target: Literal["make", "model", "year", "body"],
         logger: loguru.Logger,
     ) -> None:
         self.validated_data_dir = validated_data_dir
         self.preprocessed_labels_dir = preprocessed_labels_dir
-        self.labels_to_preprocess = labels_to_preprocess
+        self.target = target
         self.logger = logger
 
     @classmethod
-    def from_config(cls, config: DataConfig, logger: loguru.Logger) -> Preprocessing:
+    def from_config(
+        cls,
+        config: DataConfig,
+        target: Literal["make", "model", "year", "body"],
+        logger: loguru.Logger,
+    ) -> Preprocessing:
         return cls(
             validated_data_dir=Path(config.validated_data_dir),
             preprocessed_labels_dir=Path(config.preprocessed_labels_dir),
-            labels_to_preprocess=config.preprocessing.labels_to_preprocess,
+            target=target,
             logger=logger,
         )
 
-    @staticmethod
-    def map_labels(df: pd.DataFrame, label: str, d: dict) -> pd.DataFrame:
+    def _map_labels(
+        self, df: pd.DataFrame, label: Literal["make", "model", "year", "body"], d: dict
+    ) -> pd.DataFrame:
         df[label] = df[label].map(d).fillna(df[label])
         return df
 
-    @staticmethod
-    def impute_missing_values(df: pd.DataFrame, label: str) -> pd.DataFrame:
+    def _impute_missing_values(
+        self,
+        df: pd.DataFrame,
+        label: Literal["make", "model", "year", "body"],
+    ) -> pd.DataFrame:
         df[f"{label}_new"] = df.groupby("vin")[label].fillna(method="ffill")
         df[f"{label}_new"] = df.groupby("vin")[f"{label}_new"].fillna(method="bfill")
 
@@ -74,19 +84,20 @@ class Preprocessing:
         return df
 
     def preprocess_data(self) -> None:
-        for label in self.labels_to_preprocess:
-            df = pd.read_csv(
-                Path(self.validated_data_dir, f"vin_{label}_pairs_good.csv")
-            )
-            df = df[["vin", label]].drop_duplicates()
-            for d in [self.CUSTOM_MODEL_GROUP_1, self.CUSTOM_MODEL_GROUP_2]:
-                df = self.map_labels(df=df, label=label, d=d)
-            df = self.impute_missing_values(df=df, label=label)
+        df = pd.read_csv(
+            Path(self.validated_data_dir, f"vin_{self.target}_pairs_good.csv")
+        )
+        df = df[["vin", self.target]].drop_duplicates()
 
-            Path(self.preprocessed_labels_dir).mkdir(parents=True, exist_ok=True)
+        for d in [self.CUSTOM_MODEL_GROUP_1, self.CUSTOM_MODEL_GROUP_2]:
+            df = self._map_labels(df=df, label=self.target, d=d)
 
-            df.to_csv(
-                Path(self.preprocessed_labels_dir, f"vin_{label}_pairs_w_labels.csv"),
-                index=False,
-            )
+        df = self._impute_missing_values(df=df, label=self.target)
+
+        Path(self.preprocessed_labels_dir).mkdir(parents=True, exist_ok=True)
+
+        df.to_csv(
+            Path(self.preprocessed_labels_dir, f"vin_{self.target}_pairs_w_labels.csv"),
+            index=False,
+        )
         self.logger.info("✅ Label preprocessing is finished!")
